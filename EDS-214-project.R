@@ -6,20 +6,19 @@
 
 #................................................................
 
-# Intsalling necessary packages. 
+# Installing necessary packages. 
 
 
 library(here)
 library(tidyverse)
 library(janitor)
 library(lubridate)
-library(zoo)
 library(patchwork)
-library(slider)
+library(gridExtra)
 
+source("moving_average.R")
 
 # Reading in data using here() and read_csv.
-
 
 Q1 <- read_csv(here("data", "QuebradaCuenca1-Bisley.csv")) |> 
   janitor::clean_names()
@@ -37,7 +36,7 @@ PRM <- read_csv(here("data", "RioMameyesPuenteRoto.csv")) |>
 #Merge all datasets together with rbind to create a 'long' dataframe with variables stacked  
 
 
-Q1_Q2_Q3_PRM <- rbind(Q1, Q2, Q3, PRM)
+Q1_Q2_Q3_PRM <- rbind(Q1, Q2, Q3, PRM) |> 
 
 
 #Selecting for variables that are relevant to the figure.
@@ -45,74 +44,44 @@ Q1_Q2_Q3_PRM <- rbind(Q1, Q2, Q3, PRM)
 
 cleaned <- Q1_Q2_Q3_PRM |> 
   select(sample_id, sample_date, nh4_n, ca, mg, no3_n, k) |> 
-  filter(sample_date > "1988-01-01" & sample_date < "1995-01-01") |> 
-  mutate(nh4_avg = rollmean(nh4_n, k = 9, fill = 0))|> 
-  mutate(ca_avg = rollmean(ca, k = 9, fill = 0)) |> 
-  mutate(mg_avg = rollmean(mg, k = 9, fill = 0)) |> 
-  mutate(no3_n_avg = rollmean(no3_n, k = 9, fill = 0)) |> 
-  mutate(k_avg = rollmean(k, k = 9, fill = 0))
+  filter(sample_date > "1988-01-01" & sample_date < "1995-01-01")
 
+cleaned$k_moving <- sapply(
+  cleaned$sample_date,
+  moving_average,
+  dates = cleaned$sample_date,
+  conc = cleaned$k,
+  win_size_wks = 9)
+
+cleaned$no3_n_moving <- sapply(
+  cleaned$sample_date,
+  moving_average,
+  dates = cleaned$sample_date,
+  conc = cleaned$no3_n,
+  win_size_wks = 9)
+
+cleaned$mg_moving <- sapply(
+  cleaned$sample_date,
+  moving_average,
+  dates = cleaned$sample_date,
+  conc = cleaned$mg,
+  win_size_wks = 9)
+
+cleaned$ca_moving <- sapply(
+  cleaned$sample_date,
+  moving_average,
+  dates = cleaned$sample_date,
+  conc = cleaned$ca,
+  win_size_wks = 9)
+
+cleaned$nh4_n_moving <- sapply(
+  cleaned$sample_date,
+  moving_average,
+  dates = cleaned$sample_date,
+  conc = cleaned$nh4_n,
+  win_size_wks = 9)
 
 # Creating dataframe with respect to sample_id, selecting dates from 1988 to 1995, and adding a '9-week' moving average average column for each chemical concentration that we're interested in. 
-
-
-# Plotting moving average of NH4-N concentrations vs year
-
-
-nh4_plot <- ggplot(data = cleaned, 
-                   aes(x = sample_date, 
-                       y = nh4_avg)) + 
-  geom_line(aes(linetype = sample_id)) + 
-  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
-  xlab(" ") + 
-  ylab("NH4")
-
-nh4_plot
-
-
-# Plotting moving average of Ca concentrations vs year
-
-
-ca_plot <- ggplot(data = cleaned, 
-                  aes(x = sample_date, 
-                      y = ca_avg)) + 
-  geom_line(aes(linetype = sample_id)) + 
-  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
-  xlab(" ") + 
-  ylab("Ca") +
-  theme(axis.line = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), legend.position = "none")
-
-ca_plot
-
-
-# Plotting moving average of Mg concentrations vs year
-
-
-mg_plot <- ggplot(data = cleaned, 
-                  aes(x = sample_date, 
-                      y = mg_avg)) + 
-  geom_line(aes(linetype = sample_id)) + 
-  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
-  xlab(" ") + 
-  ylab("Mg") +
-  theme(axis.line = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), legend.position = "none")
-
-mg_plot
-
-
-# Plotting moving average of NO3 concentrations vs year
-
-
-no3_plot <- ggplot(data = cleaned, 
-                   aes(x = sample_date, 
-                       y = no3_n_avg)) + 
-  geom_line(aes(linetype = sample_id))+ 
-  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
-  xlab(" ") + 
-  ylab("NO3") +
-  theme(axis.line = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(), legend.position = "none")
-
-no3_plot
 
 
 # Plotting moving average of K concentrations vs year
@@ -120,18 +89,84 @@ no3_plot
 
 k_plot <- ggplot(data = cleaned, 
                  aes(x = sample_date, 
-                     y = k_avg)) + 
+                     y = k_moving)) + 
   geom_line(aes(linetype = sample_id)) + 
   geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
   xlab(" ") + 
   ylab("K") + 
-  theme(axis.line = element_blank(), axis.text = element_blank(), axis.ticks = element_blank(),)
+  theme(axis.line = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank())
 
 k_plot
+
+# Plotting moving average of NO3 concentrations vs year
+
+
+no3_plot <- ggplot(data = cleaned, 
+                   aes(x = sample_date, 
+                       y = no3_n_moving)) + 
+  geom_line(aes(linetype = sample_id))+ 
+  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
+  xlab(" ") + 
+  ylab("NO3") +
+  theme(axis.line = element_blank(), axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none")
+
+no3_plot
+
+# Plotting moving average of Mg concentrations vs year
+
+
+mg_plot <- ggplot(data = cleaned, 
+                  aes(x = sample_date, 
+                      y = mg_moving)) + 
+  geom_line(aes(linetype = sample_id)) + 
+  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
+  xlab(" ") + 
+  ylab("Mg") +
+  theme(axis.line = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none")
+
+mg_plot
+
+# Plotting moving average of Ca concentrations vs year
+
+
+ca_plot <- ggplot(data = cleaned, 
+                  aes(x = sample_date, 
+                      y = ca_moving)) + 
+  geom_line(aes(linetype = sample_id)) + 
+  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
+  xlab(" ") + 
+  ylab("Ca") +
+  theme(axis.line = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none")
+
+ca_plot
+
+
+# Plotting moving average of NH4-N concentrations vs year
+
+
+nh4_plot <- ggplot(data = cleaned, 
+                   aes(x = sample_date, 
+                       y = nh4_n_moving)) + 
+  geom_line(aes(linetype = sample_id)) + 
+  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
+  xlab(" ") + 
+  ylab("NH4") + 
+  theme(legend.position = "none")
+
+nh4_plot
 
 # Merging plots to replicate the style of figure 3.
 
 
 megaplot<- k_plot/ no3_plot / mg_plot / ca_plot / nh4_plot 
 megaplot
-
