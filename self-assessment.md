@@ -28,7 +28,7 @@ Does not meet specs. I need to create a fig folder to house the ggplot.pngs prod
 
 #### At least one piece of functionality has been refactored into a function in its own file
 
-Meets Specs. The moving average used in the quarto document was refactored into a function in an rscript.
+Meets Specs. The moving average used in the quarto document was refactored into a function in an rscript. 
 
 ## Document
 
@@ -42,7 +42,7 @@ Does not meet specs.
 
 #### The code is appropriately commented
 
-Meets specs. I've described several important steps above the code chunks.
+Meets specs. I've described several important steps above the code chunk.  
 
 #### Variable and function names are descriptive and follow a consistent naming convention
 
