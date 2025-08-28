@@ -20,28 +20,28 @@ source("moving_average.R")
 
 # Reading in data using here() and read_csv.
 
-Q1 <- read_csv(here("data", "QuebradaCuenca1-Bisley.csv")) |> 
+q1 <- read_csv(here("data", "QuebradaCuenca1-Bisley.csv")) |> 
   janitor::clean_names()
 
-Q2 <- read_csv(here("data", "QuebradaCuenca2-Bisley.csv")) |> 
+q2 <- read_csv(here("data", "QuebradaCuenca2-Bisley.csv")) |> 
   janitor::clean_names()
 
-Q3 <- read_csv(here("data", "QuebradaCuenca3-Bisley.csv")) |> 
+q3 <- read_csv(here("data", "QuebradaCuenca3-Bisley.csv")) |> 
   janitor::clean_names()
 
-PRM <- read_csv(here("data", "RioMameyesPuenteRoto.csv")) |> 
+prm <- read_csv(here("data", "RioMameyesPuenteRoto.csv")) |> 
   janitor::clean_names()
 
 
 #Merge all datasets together with rbind to create a 'long' dataframe with variables stacked  
 
 
-Q1_Q2_Q3_PRM <- rbind(Q1, Q2, Q3, PRM) |> 
+q1_q2_q3_prm <- rbind(Q1, Q2, Q3, PRM) |> 
 
 
 #Selecting for variables that are relevant to the figure and filtering for dates between 1988-1995
 
-cleaned <- Q1_Q2_Q3_PRM |> 
+cleaned <- q1_q2_q3_prm |> 
   select(sample_id, sample_date, nh4_n, ca, mg, no3_n, k) |> 
   filter(sample_date > "1988-01-01" & sample_date < "1995-01-01") |> 
 
@@ -169,5 +169,5 @@ nh4_plot
 # Merging plots to replicate the style of figure 3.
 
 
-megaplot<- k_plot/ no3_plot / mg_plot / ca_plot / nh4_plot 
-megaplot
+mega_plot<- k_plot/ no3_plot / mg_plot / ca_plot / nh4_plot 
+mega_plot
