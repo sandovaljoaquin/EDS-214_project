@@ -1,11 +1,19 @@
-#................................................................
-## The purpose of this script is to provide direction on how to replicate figure 3 - Concentrations of potassium, nitrate-N, magnesium, calcium and ammonium-N in Bisley, Puerto Rico streams before and after Hurricane Hugo, 9-wk moving average from Schaefer et al 2000.
+---
+title: "Paper"
+format: html
+editor: visual
+---
 
-# Author: Joaquin Sandoval 
-# email: joaquinsandoval@ucsb.edu
+## Background 
 
-#................................................................
+The purpose of this script is to provide direction on how to replicate figure 3 - Concentrations of potassium, nitrate-N, magnesium, calcium and ammonium-N in Bisley, Puerto Rico streams before and after Hurricane Hugo, 9-wk moving average from Schaefer et al 2000.
 
+Author: Joaquin Sandoval
+
+email:joaquinsandoval@ucsb.edu
+
+## Data
+```{r}
 # Installing necessary packages. 
 
 
@@ -16,9 +24,9 @@ library(lubridate)
 library(patchwork)
 library(gridExtra)
 
-source("moving_average.R")
 
 # Reading in data using here() and read_csv.
+
 
 Q1 <- read_csv(here("data", "QuebradaCuenca1-Bisley.csv")) |> 
   janitor::clean_names()
@@ -32,20 +40,30 @@ Q3 <- read_csv(here("data", "QuebradaCuenca3-Bisley.csv")) |>
 PRM <- read_csv(here("data", "RioMameyesPuenteRoto.csv")) |> 
   janitor::clean_names()
 
+```
 
+## Methods
+
+```{r}
 #Merge all datasets together with rbind to create a 'long' dataframe with variables stacked  
 
 
-Q1_Q2_Q3_PRM <- rbind(Q1, Q2, Q3, PRM) |> 
+Q1_Q2_Q3_PRM <- rbind(Q1, Q2, Q3, PRM) 
 
 
 #Selecting for variables that are relevant to the figure and filtering for dates between 1988-1995
 
 cleaned <- Q1_Q2_Q3_PRM |> 
   select(sample_id, sample_date, nh4_n, ca, mg, no3_n, k) |> 
-  filter(sample_date > "1988-01-01" & sample_date < "1995-01-01") |> 
+  filter(sample_date > "1988-01-01" & sample_date < "1995-01-01")
 
-# Using moving_average function along with s apply to create new columns 
+# source moving average function from script
+getwd()
+here()
+
+source(here("moving_average.R"))
+
+# Adding a '9-week' moving average average column for each chemical concentration that we're interested in. 
 
 cleaned$k_moving <- sapply(
   cleaned$sample_date,
@@ -82,11 +100,15 @@ cleaned$nh4_n_moving <- sapply(
   conc = cleaned$nh4_n,
   win_size_wks = 9)
 
-# Creating dataframe with respect to sample_id, selecting dates from 1988 to 1995, and adding a '9-week' moving average average column for each chemical concentration that we're interested in. 
-
-
 # Plotting moving average of K concentrations vs year
 
+```
+
+
+## Results
+
+```{r}
+# Plotting moving average of K concentrations vs year
 
 k_plot <- ggplot(data = cleaned, 
                  aes(x = sample_date, 
@@ -166,8 +188,12 @@ nh4_plot <- ggplot(data = cleaned,
 
 nh4_plot
 
+
 # Merging plots to replicate the style of figure 3.
 
 
 megaplot<- k_plot/ no3_plot / mg_plot / ca_plot / nh4_plot 
 megaplot
+
+```
+
