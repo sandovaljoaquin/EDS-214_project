@@ -4,15 +4,16 @@ format: html
 editor: visual
 ---
 
-## Background 
+## Background
 
 The purpose of this script is to provide direction on how to replicate figure 3 - Concentrations of potassium, nitrate-N, magnesium, calcium and ammonium-N in Bisley, Puerto Rico streams before and after Hurricane Hugo, 9-wk moving average from Schaefer et al 2000.
 
 Author: Joaquin Sandoval
 
-email:joaquinsandoval@ucsb.edu
+email:joaquinsandoval\@ucsb.edu
 
 ## Data
+
 ```{r}
 # Installing necessary packages. 
 
@@ -58,8 +59,6 @@ cleaned <- Q1_Q2_Q3_PRM |>
   filter(sample_date > "1988-01-01" & sample_date < "1995-01-01")
 
 # source moving average function from script
-getwd()
-here()
 
 source(here("moving_average.R"))
 
@@ -103,7 +102,6 @@ cleaned$nh4_n_moving <- sapply(
 # Plotting moving average of K concentrations vs year
 
 ```
-
 
 ## Results
 
@@ -196,4 +194,3 @@ megaplot<- k_plot/ no3_plot / mg_plot / ca_plot / nh4_plot
 megaplot
 
 ```
-
