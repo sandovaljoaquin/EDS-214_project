@@ -41,46 +41,49 @@ Q1_Q2_Q3_PRM <- rbind(Q1, Q2, Q3, PRM)
 #Selecting for variables that are relevant to the figure and filtering for dates between 1988-1995
 
 cleaned <- Q1_Q2_Q3_PRM |> 
-  select(sample_id, sample_date, nh4_n, ca, mg, no3_n, k) |> 
+  select(sample_id, sample_date, nh4_n, ca, mg, no3_n, k) |>
   filter(sample_date > "1988-01-01" & sample_date < "1995-01-01") |> 
-  arrange(sample_date)
+  arrange(sample_date) |> 
+  pivot_longer(cols = c("nh4_n", "ca", "mg", "no3_n", "k"), names_to = "stream_ion", values_to = "concentration")
 
-# Using moving_average function along with sapply to create new columns 
 
-cleaned$k <- sapply(
-  cleaned$sample_date,
+rolling_average <- cleaned |> 
+group_by(sample_id, stream_ion) |> 
+mutate(moving_avg = sapply(
+  sample_date,
   moving_average,
-  dates = cleaned$sample_date,
-  conc = cleaned$k,
-  win_size_wks = 9)
+  dates = sample_date,
+  conc = concentration, 
+  win_size_wks = 9)) |> 
+  ungroup()
 
-cleaned$no3_n <- sapply(
-  cleaned$sample_date,
-  moving_average,
-  dates = cleaned$sample_date,
-  conc = cleaned$no3_n,
-  win_size_wks = 9)
-
-cleaned$mg <- sapply(
-  cleaned$sample_date,
-  moving_average,
-  dates = cleaned$sample_date,
-  conc = cleaned$mg,
-  win_size_wks = 9)
-
-cleaned$ca <- sapply(
-  cleaned$sample_date,
-  moving_average,
-  dates = cleaned$sample_date,
-  conc = cleaned$ca,
-  win_size_wks = 9)
-
-cleaned$nh4_n <- sapply(
-  cleaned$sample_date,
-  moving_average,
-  dates = cleaned$sample_date,
-  conc = cleaned$nh4_n,
-  win_size_wks = 9)
+# cleaned$no3_n <- sapply(
+#   cleaned$sample_date,
+#   moving_average,
+#   dates = cleaned$sample_date,
+#   conc = cleaned$no3_n,
+#   win_size_wks = 9)
+# 
+# cleaned$mg <- sapply(
+#   cleaned$sample_date,
+#   moving_average,
+#   dates = cleaned$sample_date,
+#   conc = cleaned$mg,
+#   win_size_wks = 9)
+# 
+# cleaned$ca <- sapply(
+#   cleaned$sample_date,
+#   moving_average,
+#   dates = cleaned$sample_date,
+#   conc = cleaned$ca,
+#   win_size_wks = 9)
+# 
+# cleaned$nh4_n <- sapply(
+#   cleaned$sample_date,
+#   moving_average,
+#   dates = cleaned$sample_date,
+#   conc = cleaned$nh4_n,
+#   win_size_wks = 9)
 
 # Adding a '9-week' moving average average column for each chemical concentration that we're interested in. 
 
@@ -88,16 +91,20 @@ cleaned$nh4_n <- sapply(
 # Plotting moving average of K concentrations vs year
 
 
-k_plot <- ggplot(data = cleaned,
-                 aes(x = sample_date,
-                     y = k)) +
-  geom_line(aes(linetype = sample_id)) +
-  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") +
-  xlab(" ") +
-  ylab("K") +
-  theme(axis.line = element_blank(),
-        axis.text = element_blank(),
-        axis.ticks = element_blank())
+conc_plot <- ggplot(data = rolling_average) +
+  geom_line(aes(x = sample_date,
+                 y = concentration, linetype = sample_id)) +
+  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
+               facet_wrap(~stream_ion, scales = "free_y", ncol = 1, 
+                          strip.position = "left") + 
+  ylab("Concentration (ug/L)") + 
+  xlab("Sample Date")
+
+conc_plot
+
+  # theme(axis.line = element_blank(),
+  #       axis.text = element_blank(),
+  #       axis.ticks = element_blank())
 
 k_plot
 
