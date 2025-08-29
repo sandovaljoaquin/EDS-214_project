@@ -14,7 +14,7 @@ email: joaquinsandoval\@ucsb.edu
 
 ## Data
 
-The environment.R script in the root directory contains all necessary packages for this analysis.
+The environment.R script in the root directory contains all necessary packages for this analysis. Check to see if the packages are installed. If not, run the script.
 
 The section below contains the necessary data for the figure replication.
 
