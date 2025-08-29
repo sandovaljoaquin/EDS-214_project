@@ -10,7 +10,7 @@ The purpose of this document is to provide direction on how to replicate figure 
 
 Author: Joaquin Sandoval
 
-email: joaquinsandoval\@ucsb.edu
+email: joaquinsandoval@ucsb.edu
 
 ## Data
 

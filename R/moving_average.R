@@ -1,5 +1,5 @@
 moving_average <- function(sample_date, dates, conc, win_size_wks) {
-  # Which dates are in the window?
+  # Dates in the window
   is_in_window <- (dates > sample_date - (win_size_wks / 2) * 7) &
     (dates < sample_date + (win_size_wks / 2) * 7)
   # Find the associated concentrations
