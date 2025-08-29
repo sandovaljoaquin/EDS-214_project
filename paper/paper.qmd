@@ -16,10 +16,17 @@ email: joaquinsandoval\@ucsb.edu
 
 The environment.R script in the root directory contains all necessary packages for this analysis. Check to see if the packages are installed. If not, run the script.
 
+```{r, echo = FALSE, message = FALSE}
+library(here)
+library(dplyr)
+library(tidyverse)
+library(janitor)
+```
+
 The section below contains the necessary data for the figure replication.
 
 ```{r, message = FALSE, warning = FALSE}
-combined_data <- readRDS(here("outputs", "combined_data.rds"))
+combined_data <- readRDS(here::here("outputs", "combined_data.rds"))
 ```
 
 ## Methods
@@ -27,7 +34,7 @@ combined_data <- readRDS(here("outputs", "combined_data.rds"))
 For instruction on data cleaning to isolate variables of interest, pivot the dataframe from wide to long format, and use the moving_average function, see rolling_averages.rds.
 
 ```{r}
-rolling_average <- readRDS(here("outputs", "rolling_average.rds"))
+rolling_average <- readRDS(here::here("outputs", "rolling_average.rds"))
 ```
 
 ## Results
