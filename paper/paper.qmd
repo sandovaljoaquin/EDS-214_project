@@ -1,196 +1,98 @@
 ---
-title: "Paper"
+title: "EDS-214 Project"
 format: html
 editor: visual
 ---
 
 ## Background
 
-The purpose of this script is to provide direction on how to replicate figure 3 - Concentrations of potassium, nitrate-N, magnesium, calcium and ammonium-N in Bisley, Puerto Rico streams before and after Hurricane Hugo, 9-wk moving average from Schaefer et al 2000.
+The purpose of this document is to provide direction on how to replicate figure 3 - Concentrations of potassium, nitrate-N, magnesium, calcium and ammonium-N in Bisley, Puerto Rico streams before and after Hurricane Hugo, 9-wk moving average from Schaefer et al 2000.
 
 Author: Joaquin Sandoval
 
-email:joaquinsandoval\@ucsb.edu
+email: joaquinsandoval\@ucsb.edu
 
 ## Data
 
-```{r}
+The section below contains the necessary packages and data for the figure replication. 
+
+```{r, message = FALSE, warning = FALSE}
+
 # Installing necessary packages. 
 
-
 library(here)
+library(dplyr)
 library(tidyverse)
 library(janitor)
-library(lubridate)
-library(patchwork)
-library(gridExtra)
 
+# Reading in data using here() and read_csv while cleaning column names to lower snake case.
 
-# Reading in data using here() and read_csv.
-
-
-Q1 <- read_csv(here("data", "QuebradaCuenca1-Bisley.csv")) |> 
+q1 <- read_csv(here("data", "QuebradaCuenca1-Bisley.csv")) |> 
   janitor::clean_names()
 
-Q2 <- read_csv(here("data", "QuebradaCuenca2-Bisley.csv")) |> 
+q2 <- read_csv(here("data", "QuebradaCuenca2-Bisley.csv")) |> 
   janitor::clean_names()
 
-Q3 <- read_csv(here("data", "QuebradaCuenca3-Bisley.csv")) |> 
+q3 <- read_csv(here("data", "QuebradaCuenca3-Bisley.csv")) |> 
   janitor::clean_names()
 
-PRM <- read_csv(here("data", "RioMameyesPuenteRoto.csv")) |> 
+prm <- read_csv(here("data", "RioMameyesPuenteRoto.csv")) |> 
   janitor::clean_names()
 
 ```
 
 ## Methods
 
+Instruction on data cleaning to isolate variables of interest and pivot the dataframe from wide to long format. The moving_average function sourced from an R script located in the R folder was used within the spply function to calculate 9 week rolling means of ion concentrations to smooth out gaps in the inconsistent data.
+
 ```{r}
-#Merge all datasets together with rbind to create a 'long' dataframe with variables stacked  
+# Merge all datasets together with rbind to create a 'long' dataframe with variables stacked.  
 
 
-Q1_Q2_Q3_PRM <- rbind(Q1, Q2, Q3, PRM) 
+q1_q2_q3_prm <- rbind(q1, q2, q3, prm) 
 
 
-#Selecting for variables that are relevant to the figure and filtering for dates between 1988-1995
+# Selecting for variables that are relevant to the figure and filtering for dates between 1988-1995. Also, pivoting longer to create columns 'stream_ion' and 'concentration'. 
 
-cleaned <- Q1_Q2_Q3_PRM |> 
-  select(sample_id, sample_date, nh4_n, ca, mg, no3_n, k) |> 
-  filter(sample_date > "1988-01-01" & sample_date < "1995-01-01")
+cleaned <- q1_q2_q3_prm |> 
+  select(sample_id, sample_date, nh4_n, ca, mg, no3_n, k) |>
+  filter(sample_date > "1988-01-01" & sample_date < "1995-01-01") |> 
+  arrange(sample_date) |> 
+  pivot_longer(cols = c("nh4_n", "ca", "mg", "no3_n", "k"), names_to = "stream_ion", values_to = "concentration")
 
-# source moving average function from script
+# Source moving average function from r script.
 
-source(here("moving_average.R"))
+source(here("R", "moving_average.R"))
 
-# Adding a '9-week' moving average average column for each chemical concentration that we're interested in. 
+# Adding a '9-week' moving average column for each observation under the concentration column. 
 
-cleaned$k_moving <- sapply(
-  cleaned$sample_date,
+rolling_average <- cleaned |> 
+group_by(sample_id, stream_ion) |> 
+mutate(moving_avg = sapply(
+  sample_date,
   moving_average,
-  dates = cleaned$sample_date,
-  conc = cleaned$k,
-  win_size_wks = 9)
-
-cleaned$no3_n_moving <- sapply(
-  cleaned$sample_date,
-  moving_average,
-  dates = cleaned$sample_date,
-  conc = cleaned$no3_n,
-  win_size_wks = 9)
-
-cleaned$mg_moving <- sapply(
-  cleaned$sample_date,
-  moving_average,
-  dates = cleaned$sample_date,
-  conc = cleaned$mg,
-  win_size_wks = 9)
-
-cleaned$ca_moving <- sapply(
-  cleaned$sample_date,
-  moving_average,
-  dates = cleaned$sample_date,
-  conc = cleaned$ca,
-  win_size_wks = 9)
-
-cleaned$nh4_n_moving <- sapply(
-  cleaned$sample_date,
-  moving_average,
-  dates = cleaned$sample_date,
-  conc = cleaned$nh4_n,
-  win_size_wks = 9)
-
-# Plotting moving average of K concentrations vs year
+  dates = sample_date,
+  conc = concentration, 
+  win_size_wks = 9)) |> 
+  ungroup()
 
 ```
 
 ## Results
 
-```{r}
-# Plotting moving average of K concentrations vs year
+Adding layers to ggplot to finally replicate figure 3 from Schaefer et al 2000. 
 
-k_plot <- ggplot(data = cleaned, 
-                 aes(x = sample_date, 
-                     y = k_moving)) + 
-  geom_line(aes(linetype = sample_id)) + 
+```{r, warning=FALSE}
+# Plotting moving averages of all ions relative to site.
+
+conc_plot <- ggplot(data = rolling_average) +
+  geom_line(aes(x = sample_date,
+                 y = concentration, linetype = sample_id)) +
   geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
-  xlab(" ") + 
-  ylab("K") + 
-  theme(axis.line = element_blank(),
-        axis.text = element_blank(),
-        axis.ticks = element_blank())
+               facet_wrap(~stream_ion, scales = "free_y", ncol = 1, 
+                          strip.position = "left") + 
+  ylab("Concentration (ug/L)") + 
+  xlab("Sample Date") 
 
-k_plot
-
-# Plotting moving average of NO3 concentrations vs year
-
-
-no3_plot <- ggplot(data = cleaned, 
-                   aes(x = sample_date, 
-                       y = no3_n_moving)) + 
-  geom_line(aes(linetype = sample_id))+ 
-  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
-  xlab(" ") + 
-  ylab("NO3") +
-  theme(axis.line = element_blank(), axis.text = element_blank(),
-        axis.ticks = element_blank(),
-        legend.position = "none")
-
-no3_plot
-
-# Plotting moving average of Mg concentrations vs year
-
-
-mg_plot <- ggplot(data = cleaned, 
-                  aes(x = sample_date, 
-                      y = mg_moving)) + 
-  geom_line(aes(linetype = sample_id)) + 
-  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
-  xlab(" ") + 
-  ylab("Mg") +
-  theme(axis.line = element_blank(),
-        axis.text = element_blank(),
-        axis.ticks = element_blank(),
-        legend.position = "none")
-
-mg_plot
-
-# Plotting moving average of Ca concentrations vs year
-
-
-ca_plot <- ggplot(data = cleaned, 
-                  aes(x = sample_date, 
-                      y = ca_moving)) + 
-  geom_line(aes(linetype = sample_id)) + 
-  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
-  xlab(" ") + 
-  ylab("Ca") +
-  theme(axis.line = element_blank(),
-        axis.text = element_blank(),
-        axis.ticks = element_blank(),
-        legend.position = "none")
-
-ca_plot
-
-
-# Plotting moving average of NH4-N concentrations vs year
-
-
-nh4_plot <- ggplot(data = cleaned, 
-                   aes(x = sample_date, 
-                       y = nh4_n_moving)) + 
-  geom_line(aes(linetype = sample_id)) + 
-  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
-  xlab(" ") + 
-  ylab("NH4") + 
-  theme(legend.position = "none")
-
-nh4_plot
-
-
-# Merging plots to replicate the style of figure 3.
-
-
-megaplot<- k_plot/ no3_plot / mg_plot / ca_plot / nh4_plot 
-megaplot
-
+conc_plot
 ```

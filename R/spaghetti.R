@@ -68,6 +68,6 @@ conc_plot <- ggplot(data = rolling_average) +
                           strip.position = "left") + 
   ylab("Concentration (ug/L)") + 
   xlab("Sample Date")
-
+conc_plot
 
 
