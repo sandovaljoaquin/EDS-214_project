@@ -48,9 +48,7 @@ Instruction on data cleaning to isolate variables of interest and pivot the data
 ```{r}
 # Merge all datasets together with rbind to create a 'long' dataframe with variables stacked.  
 
-
 q1_q2_q3_prm <- rbind(q1, q2, q3, prm) 
-
 
 # Selecting for variables that are relevant to the figure and filtering for dates between 1988-1995. Also, pivoting longer to create columns 'stream_ion' and 'concentration'. 
 
@@ -85,7 +83,7 @@ Adding layers to ggplot to finally replicate figure 3 from Schaefer et al 2000.
 ```{r, warning=FALSE}
 # Plotting moving averages of all ions relative to site.
 
-conc_plot <- ggplot(data = rolling_average) +
+mov_conc_plot <- ggplot(data = rolling_average) +
   geom_line(aes(x = sample_date,
                  y = concentration, linetype = sample_id)) +
   geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
@@ -94,5 +92,5 @@ conc_plot <- ggplot(data = rolling_average) +
   ylab("Concentration (ug/L)") + 
   xlab("Sample Date") 
 
-conc_plot
+mov_conc_plot
 ```
