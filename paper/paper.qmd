@@ -43,7 +43,7 @@ prm <- read_csv(here("data", "RioMameyesPuenteRoto.csv")) |>
 
 ## Methods
 
-Instruction on data cleaning to isolate variables of interest and pivot the dataframe from wide to long format. The moving_average function sourced from an R script located in the R folder was used within the spply function to calculate 9 week rolling means of ion concentrations to smooth out gaps in the inconsistent data.
+Instruction on data cleaning to isolate variables of interest and pivot the dataframe from wide to long format. The moving_average function sourced from an R script located in the R folder was used within the sapply function to calculate 9 week rolling means of ion concentrations to smooth out gaps in the inconsistent data.
 
 ```{r}
 # Merge all datasets together with rbind to create a 'long' dataframe with variables stacked.  
