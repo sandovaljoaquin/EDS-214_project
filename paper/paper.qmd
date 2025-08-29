@@ -6,7 +6,7 @@ editor: visual
 
 ## Background
 
-The purpose of this document is to provide direction on how to replicate figure 3 - Concentrations of potassium, nitrate-N, magnesium, calcium and ammonium-N in Bisley, Puerto Rico streams before and after Hurricane Hugo, 9-wk moving average from Schaefer et al 2000.
+The purpose of this document is to provide direction on how to replicate figure 3: Concentrations of potassium, nitrate-N, magnesium, calcium and ammonium-N in Bisley, Puerto Rico streams before and after Hurricane Hugo, 9-wk moving average from Schaefer et al 2000.
 
 Author: Joaquin Sandoval
 
