@@ -14,7 +14,7 @@ cleaned <- q1_q2_q3_prm |>
 
 source(here("R", "moving_average.R"))
 
-# Adding a '9-week' moving average column for each observation under the concentration column. 
+# Adding a 9-week moving average column for each observation under the concentration column. 
 
 rolling_average <- cleaned |> 
   group_by(sample_id, stream_ion) |> 
