@@ -10,11 +10,11 @@ The purpose of this document is to provide direction on how to replicate figure 
 
 Author: Joaquin Sandoval
 
-email: joaquinsandoval@ucsb.edu
+email: joaquinsandoval\@ucsb.edu
 
 ## Data
 
-The section below contains the necessary packages and data for the figure replication. 
+The section below contains the necessary packages and data for the figure replication.
 
 ```{r, message = FALSE, warning = FALSE}
 
@@ -78,7 +78,7 @@ mutate(moving_avg = sapply(
 
 ## Results
 
-Adding layers to ggplot to finally replicate figure 3 from Schaefer et al 2000. 
+Adding layers to ggplot to finally replicate figure 3 from Schaefer et al 2000.
 
 ```{r, warning=FALSE}
 # Plotting moving averages of all ions relative to site.
@@ -87,10 +87,18 @@ mov_conc_plot <- ggplot(data = rolling_average) +
   geom_line(aes(x = sample_date,
                  y = concentration, linetype = sample_id)) +
   geom_vline(xintercept = as.Date("1989-09-10"), linetype = "dashed") + 
-               facet_wrap(~stream_ion, scales = "free_y", ncol = 1, 
-                          strip.position = "left") + 
-  ylab("Concentration (ug/L)") + 
-  xlab("Sample Date") 
+               facet_wrap(~stream_ion, scales = "free_y", 
+                          ncol = 1, 
+                          strip.position = "left", 
+                          labeller = as_labeller(c(ca = "Ca (mg l-1)",
+                                              k = "K (mg l-1)",
+                                              mg = "Mg (mg l-1)", 
+                                              nh4_n = "NH4-N (ug l-1)", 
+                                              no3_n = "NO3-N (ug l-1"))) + 
+  theme(strip.text = element_text(size = 5)) + 
+  ylab("Concentration") + 
+  xlab("Sample Date") + 
+  labs(linetype = "Site")
 
 mov_conc_plot
 ```
