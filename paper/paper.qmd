@@ -62,7 +62,7 @@ cleaned <- q1_q2_q3_prm |>
 
 source(here("R", "moving_average.R"))
 
-# Adding a '9-week' moving average column for each observation under the concentration column. 
+# Adding a 9-week moving average column for each observation under the concentration column. 
 
 rolling_average <- cleaned |> 
 group_by(sample_id, stream_ion) |> 
@@ -86,7 +86,7 @@ Adding layers to ggplot to finally replicate figure 3 from Schaefer et al 2000.
 mov_conc_plot <- ggplot(data = rolling_average) +
   geom_line(aes(x = sample_date,
                  y = concentration, linetype = sample_id)) +
-  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "solid") + 
+  geom_vline(xintercept = as.Date("1989-09-10"), linetype = "dashed") + 
                facet_wrap(~stream_ion, scales = "free_y", ncol = 1, 
                           strip.position = "left") + 
   ylab("Concentration (ug/L)") + 
