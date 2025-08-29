@@ -14,6 +14,10 @@ assessments: Peer and Self Assessment md files.
 
 scratch: Original spaghetti code R script.
 
+#### Flow Chart of Figure Replication
+
+![](images/clipboard-2155624486.png)
+
 #### Data Access
 
 Data for this figure replication was retrieved from <https://portal.edirepository.org/nis/mapbrowse?packageid=knb-lter-luq.20.4923064>
