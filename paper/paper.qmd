@@ -14,66 +14,20 @@ email: joaquinsandoval\@ucsb.edu
 
 ## Data
 
-The section below contains the necessary packages and data for the figure replication.
+The environment.R script in the root directory contains all necessary packages for this analysis.
+
+The section below contains the necessary data for the figure replication.
 
 ```{r, message = FALSE, warning = FALSE}
-
-# Installing necessary packages. 
-
-library(here)
-library(dplyr)
-library(tidyverse)
-library(janitor)
-
-# Reading in data using here() and read_csv while cleaning column names to lower snake case.
-
-q1 <- read_csv(here("data", "QuebradaCuenca1-Bisley.csv")) |> 
-  janitor::clean_names()
-
-q2 <- read_csv(here("data", "QuebradaCuenca2-Bisley.csv")) |> 
-  janitor::clean_names()
-
-q3 <- read_csv(here("data", "QuebradaCuenca3-Bisley.csv")) |> 
-  janitor::clean_names()
-
-prm <- read_csv(here("data", "RioMameyesPuenteRoto.csv")) |> 
-  janitor::clean_names()
-
+combined_data <- readRDS(here("outputs", "combined_data.rds"))
 ```
 
 ## Methods
 
-Instruction on data cleaning to isolate variables of interest and pivot the dataframe from wide to long format. The moving_average function sourced from an R script located in the R folder was used within the sapply function to calculate 9 week rolling means of ion concentrations to smooth out gaps in the inconsistent data.
+For instruction on data cleaning to isolate variables of interest, pivot the dataframe from wide to long format, and use the moving_average function, see rolling_averages.rds.
 
 ```{r}
-# Merge all datasets together with rbind to create a 'long' dataframe with variables stacked.  
-
-q1_q2_q3_prm <- rbind(q1, q2, q3, prm) 
-
-# Selecting for variables that are relevant to the figure and filtering for dates between 1988-1995. Also, pivoting longer to create columns 'stream_ion' and 'concentration'. 
-
-cleaned <- q1_q2_q3_prm |> 
-  select(sample_id, sample_date, nh4_n, ca, mg, no3_n, k) |>
-  filter(sample_date > "1988-01-01" & sample_date < "1995-01-01") |> 
-  arrange(sample_date) |> 
-  pivot_longer(cols = c("nh4_n", "ca", "mg", "no3_n", "k"), names_to = "stream_ion", values_to = "concentration")
-
-# Source moving average function from r script.
-
-source(here("R", "moving_average.R"))
-
-# Adding a 9-week moving average column for each observation under the concentration column. 
-
-rolling_average <- cleaned |> 
-group_by(sample_id, stream_ion) |> 
-mutate(moving_avg = sapply(
-  sample_date,
-  moving_average,
-  dates = sample_date,
-  conc = concentration, 
-  win_size_wks = 9)) |> 
-  ungroup()
-
+rolling_average <- readRDS(here("outputs", "rolling_average.rds"))
 ```
 
 ## Results

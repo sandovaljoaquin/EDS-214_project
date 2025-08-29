@@ -1,7 +1,3 @@
-# Merge all datasets together with rbind to create a 'long' dataframe with variables stacked.  
-
-q1_q2_q3_prm <- rbind(q1, q2, q3, prm) 
-
 # Selecting for variables that are relevant to the figure and filtering for dates between 1988-1995. Also, pivoting longer to create columns 'stream_ion' and 'concentration'. 
 
 cleaned <- q1_q2_q3_prm |> 
@@ -25,3 +21,5 @@ rolling_average <- cleaned |>
     conc = concentration, 
     win_size_wks = 9)) |> 
   ungroup()
+
+saveRDS(rolling_average, file = here:: here("outputs", "rolling_average.rds"))
